@@ -1,3 +1,4 @@
+import baseStep.Base;
 import endpoint.EndPoint;
 import json.CreateOrder;
 import org.junit.Test;
@@ -8,15 +9,15 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.notNullValue;
 
 @RunWith(Parameterized.class)
-public class CreateOrderTestColor {
+public class CreateOrderTest {
     private String[] color;
 
-    public CreateOrderTestColor(String[] color) {
+    public CreateOrderTest(String[] color) {
         this.color = color;
     }
 
     @Parameterized.Parameters
-    public static Object[][] sss() {
+    public static Object[][] choiceColor() {
         return new Object[][]{
                 {new String[]{"BLACK"}},
                 {new String[]{"GREY"}},
@@ -26,7 +27,7 @@ public class CreateOrderTestColor {
     }
 
     @Test
-    public void CreateOrderTestColor() {
+    public void CreateOrderTest() {
         CreateOrder createOrder = new CreateOrder(
                 "Naruto",
                 "Uchiha",
@@ -37,6 +38,7 @@ public class CreateOrderTestColor {
                 "2020-06-06",
                 "Saske, come back to Konoha",
                 color);
+
         given()
                 .spec(Base.base())
                 .body(createOrder)

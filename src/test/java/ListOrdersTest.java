@@ -5,9 +5,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.notNullValue;
 
-public class ListCourierTest {
-    private CreateOrder number;
+public class ListOrdersTest {
 
     @Before
     public void createOrder() {
@@ -28,5 +28,14 @@ public class ListCourierTest {
     }
 
     @Test
-    public void 
+    public void listOrder() {
+        given()
+                .spec(Base.base())
+                .when()
+                .get(EndPoint.CREATING_ORDER)
+                .then()
+                .statusCode(200)
+                .and()
+                .assertThat().body("orders.id", notNullValue());
+    }
 }
