@@ -1,7 +1,10 @@
-import baseStep.Base;
+import basestep.Base;
 import endpoint.EndPoint;
+import io.qameta.allure.junit4.DisplayName;
 import json.CreatingCourier;
 import json.LoginCourier;
+import json.LoginCourierResponse;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -28,6 +31,7 @@ public class LoginCourierTest {
     }
 
     @Test
+    @DisplayName("canAuthCourier")
     public void canAuthCourier() {
         LoginCourier loginCourier = new LoginCourier(login, password);
         given()
@@ -49,5 +53,24 @@ public class LoginCourierTest {
                 .when()
                 .post(EndPoint.LOGIN_COURIER)
                 .then().statusCode(404);
+    }
+
+    @After
+    public void cleanUp() {
+        LoginCourier getIdCard = new LoginCourier(
+                login
+                , password);
+
+        LoginCourierResponse idCard =
+                given()
+                        .spec(Base.base())
+                        .body(getIdCard)
+                        .post(EndPoint.LOGIN_COURIER)
+                        .body().as(LoginCourierResponse.class);
+
+        given()
+                .spec(Base.base())
+                .body(idCard)
+                .delete(EndPoint.DELETE_COURIER + idCard.getId());
     }
 }

@@ -1,5 +1,6 @@
-import baseStep.Base;
+import basestep.Base;
 import endpoint.EndPoint;
+import io.qameta.allure.junit4.DisplayName;
 import json.CreateOrder;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +29,7 @@ public class ListOrdersTest {
     }
 
     @Test
+    @DisplayName("listOrder")
     public void listOrder() {
         given()
                 .spec(Base.base())

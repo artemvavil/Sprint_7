@@ -1,4 +1,4 @@
-package baseStep;
+package basestep;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.filter.log.RequestLoggingFilter;

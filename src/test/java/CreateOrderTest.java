@@ -1,5 +1,6 @@
-import baseStep.Base;
+import basestep.Base;
 import endpoint.EndPoint;
+import io.qameta.allure.junit4.DisplayName;
 import json.CreateOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,6 +28,7 @@ public class CreateOrderTest {
     }
 
     @Test
+    @DisplayName("CreateOrderTest")
     public void CreateOrderTest() {
         CreateOrder createOrder = new CreateOrder(
                 "Naruto",
