@@ -12,6 +12,9 @@ public class CreatingCourier {
         this.firstName = firstName;
     }
 
+    public CreatingCourier() {
+    }
+
     public String getLogin() {
         return login;
     }

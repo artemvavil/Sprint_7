@@ -1,12 +1,12 @@
-import basestep.Base;
-import endpoint.EndPoint;
 import io.qameta.allure.junit4.DisplayName;
+import io.restassured.response.ValidatableResponse;
 import json.CreateOrder;
+import org.apache.http.HttpStatus;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import steps.OrderApi;
 
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.notNullValue;
 
 @RunWith(Parameterized.class)
@@ -28,9 +28,9 @@ public class CreateOrderTest {
     }
 
     @Test
-    @DisplayName("CreateOrderTest")
+    @DisplayName("Создание заказа")
     public void CreateOrderTest() {
-        CreateOrder createOrder = new CreateOrder(
+        CreateOrder order = new CreateOrder(
                 "Naruto",
                 "Uchiha",
                 "Konoha, 142 apt.",
@@ -40,13 +40,9 @@ public class CreateOrderTest {
                 "2020-06-06",
                 "Saske, come back to Konoha",
                 color);
-
-        given()
-                .spec(Base.base())
-                .body(createOrder)
-                .when()
-                .post(EndPoint.CREATING_ORDER)
-                .then().statusCode(201)
+        ValidatableResponse response = OrderApi.createOrder(order);
+        response
+                .statusCode(HttpStatus.SC_CREATED)
                 .and()
                 .assertThat().body("track", notNullValue());
     }

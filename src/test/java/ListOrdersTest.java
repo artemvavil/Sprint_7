@@ -1,42 +1,19 @@
-import basestep.Base;
-import endpoint.EndPoint;
 import io.qameta.allure.junit4.DisplayName;
-import json.CreateOrder;
-import org.junit.Before;
+import io.restassured.response.ValidatableResponse;
+import org.apache.http.HttpStatus;
 import org.junit.Test;
+import steps.OrderApi;
 
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.notNullValue;
 
 public class ListOrdersTest {
 
-    @Before
-    public void createOrder() {
-        CreateOrder createOrder = new CreateOrder("Naruto",
-                "Uchiha",
-                "Konoha, 142 apt.",
-                "4",
-                "+7 800 355 35 35",
-                5,
-                "2020-06-06",
-                "Saske, come back to Konoha",
-                new String[]{"BLACK"});
-        given()
-                .spec(Base.base())
-                .body(createOrder)
-                .when()
-                .post(EndPoint.CREATING_ORDER);
-    }
-
     @Test
-    @DisplayName("listOrder")
+    @DisplayName("Получение списка заказов")
     public void listOrder() {
-        given()
-                .spec(Base.base())
-                .when()
-                .get(EndPoint.CREATING_ORDER)
-                .then()
-                .statusCode(200)
+        ValidatableResponse response = OrderApi.getOrders();
+        response
+                .statusCode(HttpStatus.SC_OK)
                 .and()
                 .assertThat().body("orders.id", notNullValue());
     }

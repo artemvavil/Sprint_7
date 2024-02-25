@@ -1,78 +1,65 @@
-import api.CourierApi;
-import basestep.Base;
-import endpoint.EndPoint;
-import io.qameta.allure.junit4.DisplayName;
-import io.restassured.response.Response;
-import json.CreatingCourier;
-import json.LoginCourier;
-import json.LoginCourierResponse;
+import io.restassured.response.ValidatableResponse;
+import org.apache.http.HttpStatus;
 import org.junit.After;
+import steps.CourierApi;
+import io.qameta.allure.junit4.DisplayName;
+import json.CreatingCourier;
 import org.junit.Before;
 import org.junit.Test;
+import steps.CourierGenerator;
 
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.MatcherAssert.assertThat;
+
+import static org.apache.http.HttpStatus.*;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
 
 public class CreatingCourierTest {
-    private String login = "ninja";
-    private String password = "1234";
-    private String firstName = "saske";
-    private String index;
-    private CourierApi courierApi = new CourierApi();
+
+    CreatingCourier courier;
+    Integer id;
 
     @Before
     public void setUp() {
-        index = String.valueOf((int) (Math.random() * 1000));
-        login += index;
-        password += index;
-    }
-
-    @Test
-    @DisplayName("creatingCourier")
-    public void creatingCourier() {
-        CreatingCourier creatingCourier = new CreatingCourier(login, "password", "first");
-        Response response = courierApi.create(creatingCourier);
-        assertEquals(201, response.statusCode());
-        response.then().assertThat().body("ok", equalTo(true));
-
-    }
-
-    @Test
-    @DisplayName("repeatCourier")
-    public void repeatCourier() {
-        CreatingCourier creatingCourier = new CreatingCourier(login, password, firstName);
-        given()
-                .spec(Base.base())
-                .body(creatingCourier)
-                .when()
-                .post(EndPoint.CREATING_COURIER);
-
-        given()
-                .spec(Base.base())
-                .body(creatingCourier)
-                .when()
-                .post(EndPoint.CREATING_COURIER)
-                .then().statusCode(409);
+        courier = CourierGenerator.generateRandomCourier();
     }
 
     @After
     public void cleanUp() {
-        LoginCourier getId = new LoginCourier(
-                login
-                , password);
+        if (id != null) {
+            CourierApi.deleteCourier(id);
+        }
+    }
 
-        LoginCourierResponse idCard =
-                given()
-                        .spec(Base.base())
-                        .body(getId)
-                        .post(EndPoint.LOGIN_COURIER)
-                        .body().as(LoginCourierResponse.class);
+    @Test
+    @DisplayName("Создание курьера")
+    public void creatingCourier() {
+        ValidatableResponse response = CourierApi.create(courier);
+        response
+                .statusCode(SC_CREATED)
+                .assertThat().body("ok", equalTo(true));
+    }
 
-        given()
-                .spec(Base.base())
-                .body(idCard)
-                .delete(EndPoint.DELETE_COURIER + idCard.getId());
+    @Test
+    @DisplayName("Создание курьера с повторяющимся логином")
+    public void repeatCourier() {
+        CourierApi.create(courier);
+        id = CourierApi.login(courier).extract().path("id");
+        courier.setPassword("password");
+        ValidatableResponse response = CourierApi.create(courier);
+        response.statusCode(HttpStatus.SC_CONFLICT);
+    }
+
+    @Test
+    @DisplayName("Создание нового курьера без логина")
+    public void courierCreationWithoutLogin() {
+        courier.setLogin(null);
+        ValidatableResponse response = CourierApi.create(courier);
+        response.statusCode(HttpStatus.SC_BAD_REQUEST);
+    }
+    @Test
+    @DisplayName("Создание нового курьера без пароля")
+    public void courierCreationWithoutPassword() {
+        courier.setPassword(null);
+        ValidatableResponse response = CourierApi.create(courier);
+        response.statusCode(HttpStatus.SC_BAD_REQUEST);
     }
 }

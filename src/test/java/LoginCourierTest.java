@@ -1,76 +1,86 @@
-import basestep.Base;
-import endpoint.EndPoint;
 import io.qameta.allure.junit4.DisplayName;
+import io.restassured.response.ValidatableResponse;
 import json.CreatingCourier;
-import json.LoginCourier;
-import json.LoginCourierResponse;
+import org.apache.http.HttpStatus;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import steps.CourierApi;
+import steps.CourierGenerator;
 
-import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
 public class LoginCourierTest {
-    private String login = "ninja";
-    private String password = "1234";
-    private String index;
+    CreatingCourier courier;
+    Integer id;
 
     @Before
     public void setUp() {
-        index = String.valueOf((int) (Math.random() * 1000));
-        login += index;
-        password += index;
-        CreatingCourier creatingCourier = new CreatingCourier(login, password, null);
 
-        given()
-                .spec(Base.base())
-                .body(creatingCourier)
-                .when()
-                .post(EndPoint.CREATING_COURIER);
+        courier = CourierGenerator.generateRandomCourier();
+        CourierApi.create(courier);
+    }
+
+    @After
+    public void cleanUp() {
+        if (id != null) {
+            CourierApi.deleteCourier(id);
+        }
     }
 
     @Test
-    @DisplayName("canAuthCourier")
+    @DisplayName("Возможно авторизоваться")
     public void canAuthCourier() {
-        LoginCourier loginCourier = new LoginCourier(login, password);
-        given()
-                .spec(Base.base())
-                .body(loginCourier)
-                .when()
-                .post(EndPoint.LOGIN_COURIER)
-                .then().statusCode(200)
+        ValidatableResponse response = CourierApi.login(courier);
+        response
+                .statusCode(HttpStatus.SC_OK)
                 .and()
                 .assertThat().body("id", notNullValue());
     }
 
     @Test
-    public void errorLogin() {
-        LoginCourier loginCourier = new LoginCourier(login + 1, password);
-        given()
-                .spec(Base.base())
-                .body(loginCourier)
-                .when()
-                .post(EndPoint.LOGIN_COURIER)
-                .then().statusCode(404);
+    @DisplayName("Авторизация c несуществующим логином и паролем")
+    public void notCanAuthCourier() {
+        courier.setLogin("Llllogin");
+        courier.setPassword("pppppassword");
+        ValidatableResponse response = CourierApi.login(courier);
+        response
+                .statusCode(HttpStatus.SC_NOT_FOUND)
+                .assertThat()
+                .body("message", equalTo("Учетная запись не найдена"));
     }
 
-    @After
-    public void cleanUp() {
-        LoginCourier getIdCard = new LoginCourier(
-                login
-                , password);
+    @Test
+    @DisplayName("Неверный логин")
+    public void errorLogin() {
+        courier.setLogin("LoginLoginLogin");
+        ValidatableResponse response = CourierApi.login(courier);
+        response
+                .statusCode(HttpStatus.SC_NOT_FOUND);
+    }
+    @Test
+    @DisplayName("Неверный пароль")
+    public void errorPass() {
+        courier.setPassword("PasswordPasswordPassword");
+        ValidatableResponse response = CourierApi.login(courier);
+        response
+                .statusCode(HttpStatus.SC_NOT_FOUND);
+    }
 
-        LoginCourierResponse idCard =
-                given()
-                        .spec(Base.base())
-                        .body(getIdCard)
-                        .post(EndPoint.LOGIN_COURIER)
-                        .body().as(LoginCourierResponse.class);
+    @Test
+    @DisplayName("Авторизация без пароля")
+    public void authWithoutPasswordTest() {
+        courier.setPassword(null);
+        ValidatableResponse response = CourierApi.login(courier);
+        response.statusCode(HttpStatus.SC_BAD_REQUEST);
+    }
 
-        given()
-                .spec(Base.base())
-                .body(idCard)
-                .delete(EndPoint.DELETE_COURIER + idCard.getId());
+    @Test
+    @DisplayName("Авторизация без логина")
+    public void authWithoutLoginTest() {
+        courier.setLogin(null);
+        ValidatableResponse response = CourierApi.login(courier);
+        response.statusCode(HttpStatus.SC_BAD_REQUEST);
     }
 }
