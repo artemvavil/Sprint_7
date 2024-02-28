@@ -7,23 +7,23 @@ import json.CreateOrder;
 
 import static io.restassured.RestAssured.given;
 
-public class OrderApi extends EndPoint {
+public class OrderApi {
     @Step("Создание заказа")
     public static ValidatableResponse createOrder(CreateOrder order) {
         return given()
                 .log().all()
-                .spec(getRequestSpec())
+                .spec(EndPoint.getRequestSpec())
                 .body(order)
                 .when()
-                .post(CREATING_ORDER).then();
+                .post(EndPoint.CREATING_ORDER).then();
     }
 
     @Step("Получение списка заказов")
     public static ValidatableResponse getOrders() {
         return given()
                 .log().all()
-                .spec(getRequestSpec())
+                .spec(EndPoint.getRequestSpec())
                 .when()
-                .get(CREATING_ORDER).then();
+                .get(EndPoint.CREATING_ORDER).then();
     }
 }

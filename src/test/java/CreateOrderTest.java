@@ -29,7 +29,7 @@ public class CreateOrderTest {
 
     @Test
     @DisplayName("Создание заказа")
-    public void CreateOrderTest() {
+    public void createOrderTest() {
         CreateOrder order = new CreateOrder(
                 "Naruto",
                 "Uchiha",

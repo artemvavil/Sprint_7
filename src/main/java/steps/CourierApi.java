@@ -8,18 +8,18 @@ import json.LoginCourier;
 
 import static io.restassured.RestAssured.given;
 
-public class CourierApi extends EndPoint {
+public class CourierApi {
 
     @Step("Cоздание нового курьера")
     public static ValidatableResponse create(CreatingCourier courier) {
         return
                 given()
                         .log().all()
-                        .spec(getRequestSpec())
+                        .spec(EndPoint.getRequestSpec())
                         .and()
                         .body(courier)
                         .when()
-                        .post(CREATING_COURIER)
+                        .post(EndPoint.CREATING_COURIER)
                         .then();
     }
 
@@ -28,12 +28,12 @@ public class CourierApi extends EndPoint {
         LoginCourier loginCourier = new LoginCourier(courier.getLogin(), courier.getPassword());
         return
                 given()
-                        .spec(getRequestSpec())
+                        .spec(EndPoint.getRequestSpec())
                         .header("Content-type", "application/json")
                         .and()
                         .body(loginCourier)
                         .when()
-                        .post(LOGIN_COURIER)
+                        .post(EndPoint.LOGIN_COURIER)
                         .then();
 
     }
@@ -41,9 +41,9 @@ public class CourierApi extends EndPoint {
     @Step("Удаление курьера")
     public static ValidatableResponse deleteCourier(int idCourier) {
         return given()
-                .spec(getRequestSpec())
+                .spec(EndPoint.getRequestSpec())
                 .when()
-                .delete(DELETE_COURIER + idCourier)
+                .delete(EndPoint.DELETE_COURIER + idCourier)
                 .then();
     }
 }
